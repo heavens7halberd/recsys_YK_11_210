@@ -41,8 +41,12 @@ class CFRecommender:
     def recommend(self, user_id, events, k=5):
         seen = set(events.query('user_id==@user_id').item_id)
         all_i = set(events['item_id'])
-        preds = [(i, self.model.predict(user_id, i).est) for i in all_i - seen]
-        return [i for i, _ in sorted(preds, key=lambda x: -x[1])[:k]]
+        preds = []
+        for i in all_i - seen:
+            pred = self.model.predict(user_id, i)
+            preds.append((i, pred.est))
+        preds_sorted = sorted(preds, key=lambda x: -x[1])
+        return [i for i, _ in preds_sorted[:k]]
 
 class HeuristicRecommender:
     @staticmethod
